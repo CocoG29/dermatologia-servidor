@@ -15,12 +15,14 @@ app.use(express.json());
 
 const TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_ID = process.env.PHONE_NUMBER_ID;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyUbFOqrDQ1ZkBXSzHvDwhRQzwwxu8Kp46n280lH-a0PKbpSNCxgccRrFA3ehXaw84v/exec';
 
 app.post('/send', async (req, res) => {
   const { to, message } = req.body;
   if (!to || !message) return res.status(400).json({ error: 'Faltan datos' });
 
   try {
+    // Enviar mensaje a WhatsApp
     const response = await fetch(`https://graph.facebook.com/v22.0/${PHONE_ID}/messages`, {
       method: 'POST',
       headers: {
@@ -36,6 +38,20 @@ app.post('/send', async (req, res) => {
       })
     });
     const data = await response.json();
+
+    // Guardar en spreadsheet
+    if (data.messages) {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telefono: to,
+          mensaje: message,
+          fecha: new Date().toISOString()
+        })
+      });
+    }
+
     res.json(data);
   } catch (e) {
     res.status(500).json({ error: e.message });
