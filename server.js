@@ -22,7 +22,6 @@ app.post('/send', async (req, res) => {
   if (!to || !message) return res.status(400).json({ error: 'Faltan datos' });
 
   try {
-    // Enviar mensaje a WhatsApp
     const response = await fetch(`https://graph.facebook.com/v22.0/${PHONE_ID}/messages`, {
       method: 'POST',
       headers: {
@@ -39,7 +38,6 @@ app.post('/send', async (req, res) => {
     });
     const data = await response.json();
 
-    // Guardar en spreadsheet
     if (data.messages) {
       await fetch(SCRIPT_URL, {
         method: 'POST',
@@ -47,7 +45,8 @@ app.post('/send', async (req, res) => {
         body: JSON.stringify({
           telefono: to,
           mensaje: message,
-          fecha: new Date().toISOString()
+          fecha: new Date().toISOString(),
+          enviadoPor: 'Equipo'
         })
       });
     }
