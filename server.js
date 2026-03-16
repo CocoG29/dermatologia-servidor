@@ -57,6 +57,25 @@ app.post('/send', async (req, res) => {
   }
 });
 
+app.post('/marcar-leido', async (req, res) => {
+  const { telefono } = req.body;
+  if (!telefono) return res.status(400).json({ error: 'Falta telefono' });
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accion: 'marcar_leido',
+        telefono: telefono
+      })
+    });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/', (req, res) => res.json({ status: 'ok' }));
 
 const PORT = process.env.PORT || 3000;
